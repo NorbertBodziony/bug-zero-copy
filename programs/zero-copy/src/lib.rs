@@ -138,11 +138,13 @@ pub struct UpdateLargeAccount<'info> {
 }
 
 #[account(zero_copy)]
+// #[repr(packed)]
 #[derive(Default)]
 pub struct Foo {
     pub authority: Pubkey,
     pub data: u64,
     pub second_data: u64,
+    pub num: u8, // Only change u128 works but u8 not
     #[accessor(Pubkey)] // The `accessor` api will likely be removed.
     pub second_authority: [u8; 32],
 }
