@@ -15,8 +15,20 @@ pub mod zero_copy {
 
     pub fn create_foo(ctx: Context<CreateFoo>) -> ProgramResult {
         let foo = &mut ctx.accounts.foo.load_init()?;
-        foo.authority = *ctx.accounts.authority.key;
-        foo.set_second_authority(ctx.accounts.authority.key);
+        // foo.authority = *ctx.accounts.authority.key;
+        // foo.dec = Decimal { v: 1337 };
+        // foo.dec2 = Decimal { v: 1337 };
+        // foo.dec3 = Decimal { v: 1337 };
+        **foo = Foo {
+            authority: ctx.accounts.authority.key(),
+            second_authority: [0; 32],
+            dec: 1,
+            dec2: Decimal { v: 1337 },
+            dec3: Decimal { v: 1337 },
+            second_data: 1,
+            data: 2,
+        };
+        // foo.set_second_authority(ctx.accounts.authority.key);
         Ok(())
     }
 
@@ -138,11 +150,14 @@ pub struct UpdateLargeAccount<'info> {
 }
 
 #[account(zero_copy)]
-#[derive(Default)]
+#[derive(PartialEq, Default, Debug)]
 pub struct Foo {
     pub authority: Pubkey,
+    pub dec2: Decimal,
     pub data: u64,
     pub second_data: u64,
+    pub dec: u8,
+    pub dec3: Decimal,
     #[accessor(Pubkey)] // The `accessor` api will likely be removed.
     pub second_authority: [u8; 32],
 }
@@ -181,12 +196,51 @@ pub struct RpcEvent {
     pub from: Pubkey,
     pub data: u64,
 }
+#[zero_copy]
+#[repr(packed)]
+#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, AnchorDeserialize, AnchorSerialize)]
 
+pub struct Decimal {
+    pub v: u128,
+}
 impl From<RpcEvent> for Event {
     fn from(e: RpcEvent) -> Event {
         Event {
             from: e.from,
             data: e.data,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::mem;
+
+    use super::*;
+    #[test]
+    fn t() {
+        // let mut s = State3 {
+        //     protocol_fee: Decimal { v: 10_000_000_000 },
+        //     protocol_fee2: Decimal { v: 12_000_000_000 },
+        //     ..Default::default()
+        // };
+        // let mut s2 = State2 {
+        //     protocol_fee: Decimal2 { v: 10_000_000_000 },
+        //     protocol_fee2: Decimal2 { v: 12_000_000_000 },
+        //     ..Default::default()
+        // };
+        println!("{}", mem::size_of::<Foo>());
+        println!("{}", mem::size_of::<Decimal>());
+        // let a = Decimal { v: 10_000_000_000 };
+        // let a2 = Decimal2 { v: 10_000_000_000 };
+        // // println!("{:?}", Decimal::try_to_vec(a));
+        // // println!("{:?}", Decimal2::try_to_vec(&a2));
+        // let bytes: &[u8] = unsafe { any_as_u8_slice(&s) };
+        // let bytes2: &[u8] = unsafe { any_as_u8_slice(&s2) };
+        // // tcp_stream.write(bytes);
+        // println!("{:?}", bytes);
+        // println!("{:?}", bytes2);
+        // // println!("{:?}", State::try_to_vec(&s));
+        // // println!("{:?}", State2(&s2));
     }
 }

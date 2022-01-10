@@ -16,7 +16,7 @@ default = []
 test-bpf = []
 
 [dependencies]
-anchor-lang = "0.20.0"
+anchor-lang = "0.20.1"
 
 [dev-dependencies]
 bytemuck = "1.4.0"

@@ -22,6 +22,9 @@ describe("zero-copy", () => {
       signers: [foo],
     });
     const account = await program.account.foo.fetch(foo.publicKey);
+    console.log(account.dec.v.toString())
+    console.log(account.dec2.v.toString())
+    console.log(account.dec3.v.toString())
     assert.ok(
       JSON.stringify(account.authority.toBuffer()) ===
         JSON.stringify(program.provider.wallet.publicKey.toBuffer())
@@ -78,7 +81,7 @@ describe("zero-copy", () => {
     );
   });
 
-  it("Creates an associated zero copy account", async () => {
+  it.only("Creates an associated zero copy account", async () => {
     await program.rpc.createBar({
       accounts: {
         bar: (
